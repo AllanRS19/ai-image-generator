@@ -8,6 +8,8 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
 
+  app.setGlobalPrefix('api/v1');
+
   app.enableCors({
     origin: configService.get<string>('CORS_ORIGIN'),
     credentials: true,

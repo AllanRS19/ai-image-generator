@@ -19,11 +19,11 @@ export class User {
   @Column()
   username!: string;
 
-  @Column({ nullable: true })
-  avatarUrl?: string;
+  @Column({ type: 'varchar', nullable: true })
+  avatarUrl!: string | null;
 
-  @Column({ nullable: true })
-  email?: string;
+  @Column({ type: 'varchar', nullable: true })
+  email!: string | null;
 
   @CreateDateColumn()
   createdAt!: Date;
