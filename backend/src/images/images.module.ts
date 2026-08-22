@@ -4,6 +4,8 @@ import { BullModule } from '@nestjs/bullmq';
 import { Image } from './entities/image.entity';
 import { ImagesService } from './images.service';
 import { ImagesController } from './images.controller';
+import { FeedController } from './feed.controller';
+import { ImageController } from './image.controller';
 import { HuggingFaceService } from './hugginface.service';
 import {
   GENERATION_QUEUE,
@@ -18,7 +20,7 @@ import { StorageModule } from '../storage/storage.module';
     BullModule.registerQueue({ name: GENERATION_QUEUE }),
     StorageModule,
   ],
-  controllers: [ImagesController],
+  controllers: [ImagesController, FeedController, ImageController],
   providers: [
     ImagesService,
     HuggingFaceService,

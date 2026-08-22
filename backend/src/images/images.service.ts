@@ -1,8 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Image, ImageStatus } from './entities/image.entity';
 import { GenerateImageDto } from './dto/generate-image.dto';
+
+export interface PaginatedResult<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+}
 
 @Injectable()
 export class ImagesService {
@@ -39,6 +46,47 @@ export class ImagesService {
     }
 
     return image;
+  }
+
+  async findFeed(page: number, limit: number): Promise<PaginatedResult<Image>> {
+    const [items, total] = await this.imagesRepo.findAndCount({
+      where: { status: ImageStatus.COMPLETED },
+      relations: { author: true },
+      order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+    };
+  }
+
+  async searchFeed(
+    query: string,
+    page: number,
+    limit: number,
+  ): Promise<PaginatedResult<Image>> {
+    const [items, total] = await this.imagesRepo.findAndCount({
+      where: {
+        status: ImageStatus.COMPLETED,
+        prompt: ILike(`%${query}%`),
+      },
+      relations: { author: true },
+      order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+    };
   }
 
   async markProcessing(id: string): Promise<void> {
