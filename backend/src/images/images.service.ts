@@ -89,6 +89,21 @@ export class ImagesService {
     };
   }
 
+  async findByAuthor(
+    authorId: string,
+    page: number,
+    limit: number,
+  ): Promise<PaginatedResult<Image>> {
+    const [items, total] = await this.imagesRepo.findAndCount({
+      where: { authorId },
+      order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return { items, total, page, limit };
+  }
+
   async markProcessing(id: string): Promise<void> {
     await this.imagesRepo.update(id, { status: ImageStatus.PROCESSING });
   }
