@@ -7,4 +7,4 @@ export const CurrentUser = createParamDecorator(
     const request = ctx.switchToHttp().getRequest<RequestWithUser>();
     return request.user;
   },
-);cls
+);

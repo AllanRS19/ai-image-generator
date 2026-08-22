@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { APP_GUARD } from '@nestjs/core';
@@ -6,13 +6,14 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { validateEnv } from './config/env.validation';
-import { DatabaseModule } from './database/database.module';
 import { createRedisConnectionOptions } from './config/redis-connection-factory';
+import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ImagesModule } from './images/images.module';
 import { CollectionsModule } from './collections/collections.module';
 import { UserAwareThrottlerGuard } from './common/guards/user-aware-throttler.guard';
+import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 
 @Module({
   imports: [
@@ -32,8 +33,8 @@ import { UserAwareThrottlerGuard } from './common/guards/user-aware-throttler.gu
     ThrottlerModule.forRoot([
       {
         name: 'default',
-        ttl: 60_000, // 1 minute window
-        limit: 30, // generous default for most routes
+        ttl: 60_000,
+        limit: 30,
       },
     ]),
     UsersModule,
@@ -50,4 +51,8 @@ import { UserAwareThrottlerGuard } from './common/guards/user-aware-throttler.gu
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(CorrelationIdMiddleware).forRoutes('*');
+  }
+}
