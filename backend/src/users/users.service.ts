@@ -6,8 +6,8 @@ import { Repository } from 'typeorm';
 export interface GithubProfileInput {
   githubId: string;
   username: string;
-  avatarUrl?: string;
-  email?: string;
+  avatarUrl: string | null;
+  email: string | null;
 }
 
 @Injectable()

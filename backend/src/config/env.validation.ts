@@ -6,6 +6,7 @@ import {
   Min,
   Max,
   validateSync,
+  IsUrl,
 } from 'class-validator';
 
 enum Environment {
@@ -28,6 +29,39 @@ class EnvironmentVariables {
 
   @IsString()
   DATABASE_URL!: string;
+
+  @IsString()
+  GITHUB_CLIENT_ID!: string;
+
+  @IsString()
+  GITHUB_CLIENT_SECRET!: string;
+
+  @IsUrl({ require_tld: false })
+  GITHUB_CALLBACK_URL!: string;
+
+  @IsString()
+  JWT_SECRET!: string;
+
+  @IsString()
+  JWT_EXPIRES_IN!: string;
+
+  @IsString()
+  REDIS_URL!: string;
+
+  @IsString()
+  HUGGING_FACE_API_TOKEN!: string;
+
+  @IsString()
+  HUGGING_FACE_MODEL!: string;
+
+  @IsString()
+  CLOUDINARY_CLOUD_NAME!: string;
+
+  @IsString()
+  CLOUDINARY_API_KEY!: string;
+
+  @IsString()
+  CLOUDINARY_API_SECRET!: string;
 }
 
 export function validateEnv(config: Record<string, unknown>) {
