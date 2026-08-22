@@ -6,6 +6,7 @@ import { ImagesService } from './images.service';
 import { ImagesController } from './images.controller';
 import { FeedController } from './feed.controller';
 import { ImageController } from './image.controller';
+import { HistoryController } from './history.controller';
 import { HuggingFaceService } from './hugginface.service';
 import {
   GENERATION_QUEUE,
@@ -20,7 +21,12 @@ import { StorageModule } from '../storage/storage.module';
     BullModule.registerQueue({ name: GENERATION_QUEUE }),
     StorageModule,
   ],
-  controllers: [ImagesController, FeedController, ImageController],
+  controllers: [
+    ImagesController,
+    FeedController,
+    ImageController,
+    HistoryController,
+  ],
   providers: [
     ImagesService,
     HuggingFaceService,
