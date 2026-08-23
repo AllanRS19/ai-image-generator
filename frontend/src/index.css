@@ -1,1 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --color-app-bg: #121826;
+  --color-surface: #212936;
+  --color-surface-border: #394150;
+  --color-accent: #7c71ff;
+  --color-app-text: #e4e4e7;
+  --color-app-muted: #6c727f;
+
+  --font-inter: 'Inter', sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-app-bg font-inter;
+  }
+}
+
+@layer components {
+  .sidebar {
+    @apply fixed left-0 top-0 flex h-screen w-18 flex-col items-center border-r border-surface-border py-6;
+  }
+
+  .navbar {
+    @apply mt-13.25 flex flex-col items-center gap-4;
+  }
+
+  .generate-image-button {
+    @apply flex w-full items-center justify-center gap-2 rounded-xl bg-accent py-3.5 text-base font-semibold text-app-text disabled:cursor-not-allowed disabled:opacity-50;
+  }
+}
