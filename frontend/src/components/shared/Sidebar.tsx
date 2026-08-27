@@ -1,15 +1,26 @@
 import { NavLink } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { navItems } from '../../constants';
+import { useEffect, useState } from 'react';
+import LoginModal from './LoginModal';
+import UserMenu from '../UserMenu';
 
-const GITHUB_LOGIN_URL = `${import.meta.env.VITE_API_URL}/auth/github`;
-
-function Sidebar() {
+const Sidebar = () => {
     const token = useAuthStore((state) => state.token);
-    const logout = useAuthStore((state) => state.logout);
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+        const body = document.body;
+        if (isModalOpen && !token) {
+            body.classList.add('overflow-hidden');
+        } else {
+            body.classList.remove('overflow-hidden');
+        }
+    }, [isModalOpen, token]);
 
     return (
-        <aside className="sidebar">
+        <aside className="sidebar z-50">
             <img src="/icons/logo.svg" alt="Logo" className="size-5.5" />
 
             <nav className="navbar">
@@ -30,24 +41,25 @@ function Sidebar() {
 
             <div className="mt-auto">
                 {token ? (
-                    <button
-                        onClick={logout}
-                        className="flex size-10 items-center justify-center rounded-lg bg-surface p-2"
-                        aria-label="Sign out"
-                    >
-                        <img src="/icons/signout.svg" alt="Sign out" className="size-6" />
-                    </button>
+                    <UserMenu />
                 ) : (
-                    <a
-                        href={GITHUB_LOGIN_URL}
-                        className="flex size-10 items-center justify-center rounded-lg bg-surface p-2"
+                    <button
+                        className="flex size-10 items-center justify-center rounded-lg cursor-pointer bg-surface p-2"
                         aria-label="Sign in with GitHub"
+                        onClick={() => setIsModalOpen(true)}
                     >
                         <img src="/icons/signin.svg" alt="Sign in" className="size-6" />
-                    </a>
+                    </button>
                 )}
             </div>
-        </aside >
+
+            {isModalOpen && !token && (
+                <LoginModal
+                    onClose={() => setIsModalOpen(false)}
+                />
+            )}
+
+        </aside>
     );
 }
 

@@ -1,89 +1,58 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { apiClient, ApiError } from '../api/apiClient';
+import { ApiError } from '../api/apiClient';
 import { COLOR_SWATCHES, RESOLUTIONS } from '../constants';
+import { useGenerateImage } from '../hooks/images/useGenerateImage';
+import { useImage } from '../hooks/images/useImage';
 
-type ImageStatus = 'pending' | 'processing' | 'completed' | 'failed';
-
-interface GeneratedImage {
-    id: string;
-    prompt: string;
-    status: ImageStatus;
-    imageUrl: string | null;
-    failureReason: string | null;
+interface PrefillState {
+    prompt?: string;
+    negativePrompt?: string;
+    resolution?: string;
+    guidance?: number;
 }
 
 const GeneratePage = () => {
     const token = useAuthStore((state) => state.token);
+    const location = useLocation();
+    const prefill = (location.state as PrefillState | null) ?? {};
 
-    const [prompt, setPrompt] = useState('');
-    const [negativePrompt, setNegativePrompt] = useState('');
+    const [prompt, setPrompt] = useState(prefill.prompt ?? '');
+    const [negativePrompt, setNegativePrompt] = useState(
+        prefill.negativePrompt ?? '',
+    );
     const [color, setColor] = useState<string | null>(null);
-    const [resolution, setResolution] = useState(RESOLUTIONS[0].value);
-    const [guidance, setGuidance] = useState(7.5);
+    const [resolution, setResolution] = useState(
+        prefill.resolution ?? RESOLUTIONS[0].value,
+    );
+    const [guidance, setGuidance] = useState(prefill.guidance ?? 7.5);
+    const [activeImageId, setActiveImageId] = useState<string | null>(null);
 
-    const [image, setImage] = useState<GeneratedImage | null>(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const generateMutation = useGenerateImage((created) => setActiveImageId(created.id));
 
-    const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const { data: image } = useImage(activeImageId);
 
-    useEffect(() => {
-        return () => {
-            if (pollRef.current) clearInterval(pollRef.current);
-        };
-    }, []);
-
-    const pollImageStatus = (id: string) => {
-        pollRef.current = setInterval(() => {
-            void (async () => {
-                try {
-                    const updated = await apiClient<GeneratedImage>(`/image/${id}`, {
-                        skipAuth: true,
-                    });
-                    setImage(updated);
-
-                    if (updated.status === 'completed' || updated.status === 'failed') {
-                        if (pollRef.current) clearInterval(pollRef.current);
-                    }
-                } catch {
-                    if (pollRef.current) clearInterval(pollRef.current);
-                }
-            })();
-        }, 2000);
-    };
-
-    const handleSubmit = async () => {
-        setError(null);
-        setIsSubmitting(true);
-
-        try {
-            const created = await apiClient<GeneratedImage>('/generate', {
-                method: 'POST',
-                body: JSON.stringify({
-                    prompt,
-                    negativePrompt: negativePrompt || undefined,
-                    color: color ?? undefined,
-                    resolution,
-                    guidance,
-                }),
-            });
-
-            setImage(created);
-            pollImageStatus(created.id);
-        } catch (err) {
-            const message =
-                err instanceof ApiError ? err.message : 'Something went wrong';
-            setError(message);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+    const handleSubmit = () => {
+        generateMutation.mutate({
+            prompt,
+            negativePrompt: negativePrompt || undefined,
+            color: color ?? undefined,
+            resolution,
+            guidance
+        });
+    }
 
     const isGenerating = image?.status === 'pending' || image?.status === 'processing';
 
+    const errorMessage = generateMutation.error instanceof ApiError
+        ? generateMutation.error.message
+        : generateMutation.error
+            ? 'Something went wrong'
+            : null;
+
     return (
-        <div className="flex gap-7.5 px-18 py-13">
+        <div className="flex flex-col xl:flex-row gap-7.5 px-18 py-13">
             <div className="flex w-full flex-col gap-8">
                 <div className="flex flex-col gap-3">
                     <label className="text-sm font-semibold text-app-muted">Prompt</label>
@@ -168,7 +137,7 @@ const GeneratePage = () => {
                     />
                 </div>
 
-                {error && <p className="text-sm text-red-400">{error}</p>}
+                {errorMessage && <p className="text-sm text-red-400">{errorMessage}</p>}
 
                 {!token && (
                     <p className="text-sm text-app-muted">
@@ -179,7 +148,7 @@ const GeneratePage = () => {
                 <button
                     type="button"
                     onClick={() => void handleSubmit()}
-                    disabled={!token || !prompt.trim() || isSubmitting || isGenerating}
+                    disabled={!token || !prompt.trim() || generateMutation.isPending || isGenerating}
                     className="generate-image-button"
                 >
                     <img src="/icons/sparkles.svg" alt="" className="size-6" />

@@ -17,9 +17,11 @@ export enum ImageStatus {
 }
 
 export enum ImageResolution {
-  SQUARE_512 = '512x512',
-  SQUARE_768 = '768x768',
-  SQUARE_1024 = '1024x1024',
+  SQUARE = '1024x1024',
+  LANDSCAPE_9_7 = '1152x896',
+  PORTRAIT_7_9 = '896x1152',
+  LANDSCAPE_7_4 = '1344x768',
+  PORTRAIT_4_7 = '768x1344',
 }
 
 @Entity('images')
@@ -47,7 +49,7 @@ export class Image {
   @Column({
     type: 'enum',
     enum: ImageResolution,
-    default: ImageResolution.SQUARE_512,
+    default: ImageResolution.SQUARE,
   })
   resolution!: ImageResolution;
 
