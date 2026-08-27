@@ -6,8 +6,8 @@ import {
   GenerationJobData,
 } from './generation-queue.service';
 import { ImagesService } from '../images.service';
-import { CloudinaryService } from '../../storage/cloudinary.service';
 import { HuggingFaceService } from '../hugginface.service';
+import { CloudinaryService } from '../../storage/cloudinary.service';
 
 @Processor(GENERATION_QUEUE)
 export class GenerationProcessor extends WorkerHost {
@@ -32,6 +32,7 @@ export class GenerationProcessor extends WorkerHost {
         prompt: image.prompt,
         negativePrompt: image.negativePrompt,
         guidance: image.guidance,
+        resolution: image.resolution,
       });
 
       const imageUrl = await this.cloudinaryService.uploadImageBuffer(

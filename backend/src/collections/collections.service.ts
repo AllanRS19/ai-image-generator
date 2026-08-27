@@ -34,7 +34,7 @@ export class CollectionsService {
   ): Promise<Collection> {
     const collection = await this.collectionsRepo.findOne({
       where: { id: collectionId },
-      relations: { images: true },
+      relations: { images: { author: true } },
     });
 
     if (!collection)

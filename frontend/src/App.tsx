@@ -5,18 +5,22 @@ import FeedPage from './pages/FeedPage';
 import HistoryPage from './pages/HistoryPage';
 import CollectionsPage from './pages/CollectionsPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
+import { Toaster } from 'sileo';
 
 const App = () => {
     return (
-        <Routes>
-            <Route path="/auth/callback" element={<AuthCallbackPage />} />
-            <Route element={<Layout />}>
-                <Route path="/" element={<GeneratePage />} />
-                <Route path="/feed" element={<FeedPage />} />
-                <Route path="/history" element={<HistoryPage />} />
-                <Route path="/collections" element={<CollectionsPage />} />
-            </Route>
-        </Routes>
+        <>
+            <Toaster position='top-right' />
+            <Routes>
+                <Route path="/auth/callback" element={<AuthCallbackPage />} />
+                <Route element={<Layout />}>
+                    <Route path="/" element={<GeneratePage />} />
+                    <Route path="/feed" element={<FeedPage />} />
+                    <Route path="/history" element={<HistoryPage />} />
+                    <Route path="/collections" element={<CollectionsPage />} />
+                </Route>
+            </Routes>
+        </>
     );
 }
 
